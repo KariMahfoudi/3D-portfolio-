@@ -54,9 +54,31 @@ body{
     }
 
     .nav-item {
+        position: relative;
         text-decoration: none;
         color: var(--text-dark);
         font-size: 0.85rem;
+        font-weight: 600;
+        padding: 6px 0;
+        transition: color 0.25s ease;
+    }
+    .nav-item::after{
+        content: "";
+        position:absolute;
+        bottom :0;
+        left:0;
+        width:0%;
+        height: 2px;
+        background-color: var(--accent-orange);
+        transition: width 0.25s ease;
+    }
+    .nav-item:hover,
+    .nav-item:active{
+        color: var(--accent-orange)
+    }
+    .nav-item:hover::after,
+    .nav-item:active::after{
+        width: 100%;
     }
      .nav-brand{
         font-size: 1.5rem;
@@ -86,6 +108,15 @@ body{
     border: none;
     cursor: pointer;
     clip-path: polygon(10px 0,100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    transition: backgound-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+.btn-orange:hover{
+    background-color: var(--text-dark);
+    color: var(--accent-orange);
+    transform: translateY(-2px);
+}
+.btn-orange:active{
+    transform: translateY(0px);
 }
 .Hero-name{
     grid-column: 1/-1;
@@ -169,16 +200,22 @@ body{
     font-weight: 600;
     font-size: 1.1rem;
     border-right: 1px solid var(--line-color);
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
-.Skills-list::-webkit-scrollbar {
+.Skills-list:hover{
+    
+    color:var(--accent-orange);
+    
+}
+.Skills-list:-webkit-scrollbar {
     height: 5px;
 }
 
-.Skills-list::-webkit-scrollbar-track {
+.Skills-list:-webkit-scrollbar-track {
     background: var(--bg-main);
 }
 
-.Skills-list::-webkit-scrollbar-thumb {
+.Skills-list:-webkit-scrollbar-thumb {
     background: var(--accent-orange);
     cursor: pointer;
 }
