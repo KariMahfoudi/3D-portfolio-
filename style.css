@@ -9,7 +9,7 @@
 --font-mono: 'JetBrains Mono', monospace;
 --font-display: 'Orbitron', sans-serif;
 --font-mono: 'Iceland', monospace;
---font-display: 'swap'
+--font-display: 'swap',sans-serif;
 }
 
 
@@ -51,8 +51,45 @@ body{
         list-style: none;
         font-size: 2rem;
         font-weight: 400;
+        gap: 0;
+    }
+    .nav-links li{
+        display: flex;
+        align-items: center;
     }
 
+.nav-links li:not(:last-child)::after {
+    content: "";
+    display: block;
+    width: 140px; 
+    height: 2px;
+    margin: 0 10px;
+    background-color: var(--accent-orange); 
+
+    /* Compact electric bolt */
+    background-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--line-color) 30%,
+        #ffffff 50%,
+        var(--line-color) 70%,
+        transparent 100%
+    );
+    background-repeat: no-repeat;
+    background-size: 50% 100%;     
+    background-position: 150% 0;  
+}
+   @keyframes electric-flow {
+    100% {
+        background-position: 150% 0; /* Shoots off the LEFT edge */
+    }
+     0% {
+        background-position: -50% 0; /* Starts off the RIGHT edge */
+    }
+}
+.nav-links:hover li:not(:last-child)::after {
+    animation: electric-flow 0.5s linear infinite;
+} 
     .nav-item {
         position: relative;
         text-decoration: none;
@@ -86,8 +123,6 @@ body{
         line-height: 1.1;
        
     }
-
-
 
 .blueprint-grid {
 
@@ -202,17 +237,16 @@ body{
     border-right: 1px solid var(--line-color);
     transition: background-color 0.25s ease, color 0.25s ease;
 }
-.Skills-list:hover{
-    
-    color:var(--accent-orange);
-    
+.Skills-list:hover{   
+    color:var(--accent-orange);   
 }
 .Skills-list:-webkit-scrollbar {
     height: 5px;
+    color: var(--accent-orange);
 }
 
 .Skills-list:-webkit-scrollbar-track {
-    background: var(--bg-main);
+    background: var(--accent-orange);
 }
 
 .Skills-list:-webkit-scrollbar-thumb {
