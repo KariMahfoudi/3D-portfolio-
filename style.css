@@ -27,7 +27,7 @@ body{
 }
 .top-bar{
     display:grid;
-    grid-template-columns: 260px 1fr 340px;
+    grid-template-columns: 132px 1fr 132px;
     height: 70px;
     border-bottom: 1px solid var(--line-color);
     background-color: var(--bg-main);
@@ -49,6 +49,8 @@ body{
         display: flex;
         gap: 32px;
         list-style: none;
+        font-size: 2rem;
+        font-weight: 400;
     }
 
     .nav-item {
@@ -57,10 +59,10 @@ body{
         font-size: 0.85rem;
     }
      .nav-brand{
-        font-size: 1.05rem;
-        font-weight: 800;
+        font-size: 1.5rem;
+        font-weight: 600;
         line-height: 1.1;
-        padding-left: 60px;
+       
     }
 
 
@@ -90,14 +92,14 @@ body{
     border-top: 1px solid var(--line-color) ;
     border-bottom: 1px solid var(--line-color);
     margin-top: 24px;
-    padding: 40px 24px;
+    padding: 40px 40px;
 
 }
 
 .Hero-name h1{
     font-family:var(--font-mono);
-    font-size: 5.5rem;
-    letter-spacing: 4px;
+    font-size: 6.5rem;
+    letter-spacing: 30px;
     line-height: 1;
 }
 
@@ -141,8 +143,8 @@ body{
 }
 
 .skills-header h2 {
-    font-size: 0.75rem;
-    font-weight: 400;
+    font-size: 1.7rem;
+    font-weight: 800;
 }
 
 
