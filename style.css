@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600,800&family=Orbitron:wght@900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Iceland&display=swap');
 :root{
 --bg-main:#e6e6e6; 
 --bg-light:#f4f4f4;
@@ -8,7 +8,11 @@
 --accent-orange:#ff5b14;
 --font-mono: 'JetBrains Mono', monospace;
 --font-display: 'Orbitron', sans-serif;
+--font-mono: 'Iceland', monospace;
+--font-display: 'swap'
 }
+
+
 
 *{
     margin: 0;
@@ -40,7 +44,7 @@ body{
         align-items: center;
         justify-content: center;
     }
-
+   
     .nav-links{
         display: flex;
         gap: 32px;
@@ -52,6 +56,13 @@ body{
         color: var(--text-dark);
         font-size: 0.85rem;
     }
+     .nav-brand{
+        font-size: 1.05rem;
+        font-weight: 800;
+        line-height: 1.1;
+        padding-left: 60px;
+    }
+
 
 
 .blueprint-grid {
@@ -84,7 +95,7 @@ body{
 }
 
 .Hero-name h1{
-    font-family: var(--font-display);
+    font-family:var(--font-mono);
     font-size: 5.5rem;
     letter-spacing: 4px;
     line-height: 1;
