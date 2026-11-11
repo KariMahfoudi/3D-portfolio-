@@ -5,30 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Workspace Portfolio</title>
     <link rel="stylesheet" href="style.css">
-
-  <header class="top bar"> 
+</head>
+<body>
+  <header class="top-bar"> 
+    <div class="nav-brand">
+        <span> KAREEM MAHF</span>
+    </div>
         <nav class="hud-nav">
             <ul class="nav-links">
                 <li><a href="#home-view" class="nav-item active">HOME</a></li>
                 <li><a href="#project-view" class="nav-item">PROJECTS</a></li>
-                <li><a href="about-view" class="nav-item">ABOUT</a></li>
+                <li><a href="#about-view" class="nav-item">ABOUT</a></li>
             </ul>
         </nav>
+        <div class="nav-actions">
+            <button class="btn-orange">CONTACT ME</button>
+        </div>
 
     </header>
 
     <main class="Workspace-stage">
-       <section id="home-view" class="view-section">    
-        <div class="Hero-name">MAHFOUDI KAREEM
-        <p class="hero-role"> 2nd year CS Engineer student & Front-End Dev </p>
+        <section id="home-view" class="view-section blueprint-grid">
+             <div class="Hero-name"><h1>MAHFOUDI KAREEM</h1>
+
         </div>
 
+        <div class="left-bio">
+            <p class="hero-role"> 2nd year CS Engineer student & Front-End Dev </p>
+            <button class="btn-orange">EXPLORE MORE</button>
+        </div>
+     
         <div class="avatar-container">
-            <span> <img src="pics/Screenshot 2026-10-29 205532.png"></span>
+            <span>[3D avatar WebGL] </span>
         </div>
 
-        <div class="skills">
+       
+         <div class="skills">
+            <div class="skills-header">
             <h2> My tech stack</h2>
+            </div>
             <ul class="Skills-list">
             <li>C</li>
             <li>JAVA</li>
@@ -45,13 +60,8 @@
         <h2 class="section-title">My Projects</h2>
         <div class="wardrobe-container">
         <p class="wardrobe-status"> [3D wardrobe] </p>
-
         </div>
-
-
-
        </section>
-    
-        
     </main>
+    </body>
     </html>
