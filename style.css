@@ -186,6 +186,7 @@ body{
     justify-content: center;
     min-height: 340px;
     border-bottom: 1px solid var(--line-color);
+    position: relative;
 }
 
 
@@ -242,7 +243,6 @@ body{
 }
 .Skills-list:-webkit-scrollbar {
     height: 5px;
-    color: var(--accent-orange);
 }
 
 .Skills-list:-webkit-scrollbar-track {
@@ -252,4 +252,11 @@ body{
 .Skills-list:-webkit-scrollbar-thumb {
     background: var(--accent-orange);
     cursor: pointer;
+}
+
+.webgl-canvas{
+    width: 100%;
+    height:100%;
+    display: block;
+    outline: none;
 }
