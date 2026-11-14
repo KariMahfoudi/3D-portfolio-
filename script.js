@@ -13,12 +13,13 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(container.clientWidth , container.clientHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 
-const geometry =new THREE.IcosahedronGeometry(1.2,0);
+const geometry =new THREE.BoxGeometry(1.8,1.8,1.8);
+const texture = new THREE.TextureLoader().load('pics/Screenshot 2026-10-29 205532.png');
 const material =new THREE.MeshBasicMaterial({
-    color :0xff5b14,
-    wireframe: true,
+   
+    map : texture,
     transparent: true,
-    opacity: 0.8
+  
 });
 
 const wireframobj =new THREE.Mesh(geometry,material);
