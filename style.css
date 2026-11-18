@@ -382,7 +382,7 @@ body{
     text-decoration: none;
     cursor: pointer;
     clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-    margin-left: 250px;
+    margin-left: 550px;
     transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
 }
 
