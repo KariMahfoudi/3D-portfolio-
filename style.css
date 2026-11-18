@@ -6,10 +6,9 @@
 --text-dark:#141414;
 --line-color:#bdbdbd;
 --accent-orange:#ff5b14;
---font-mono: 'JetBrains Mono', monospace;
---font-display: 'Orbitron', sans-serif;
 --font-mono: 'Iceland', monospace;
---font-display: 'swap',sans-serif;
+--font-code: 'JetBrains Mono', monospace;
+--font-display: 'Orbitron', sans-serif;
 }
 
 
@@ -143,7 +142,7 @@ body{
     border: none;
     cursor: pointer;
     clip-path: polygon(10px 0,100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-    transition: backgound-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+    transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
 }
 .btn-orange:hover{
     background-color: var(--text-dark);
@@ -259,4 +258,159 @@ body{
     height:100%;
     display: block;
     outline: none;
+}
+
+.projects-section,
+.project-section {
+    width: auto;
+    margin: 64px 44px 80px 44px;
+}
+
+.projects-header,
+.project-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 24px 20px 36px 20px;
+}
+
+.projects-header h2,
+.project-header h2 {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--text-dark);
+}
+
+.project-card {
+    width: 100%;
+    min-height: 180px;
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    border: 1px solid var(--line-color);
+    background-color: var(--bg-light);
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.project-card:hover {
+    background-color: #ededed;
+    border-color: var(--accent-orange);
+}
+
+.project-info {
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+}
+
+.project-top,
+.project.top {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.project-index {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    color: var(--accent-orange);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 1px;
+}
+
+.project-title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+}
+
+.project-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: var(--accent-orange);
+    color: var(--text-dark);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 12px 22px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    margin-left: 0;
+    transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+
+.project-link:hover {
+    background-color: var(--text-dark);
+    color: var(--accent-orange);
+    transform: translateY(-2px);
+}
+
+.project-link:active {
+    transform: translateY(0px);
+}
+
+.project-descreption {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 70ch;
+    opacity: 0.85;
+}
+
+.project-logo {
+    border-left: 1px solid var(--line-color); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.project-logo img {
+    max-width: 110px;
+    max-height: 110px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-logo img {
+    transform: scale(1.08);
+}
+
+.logo-placeholder {
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    opacity: 0.35;
+}
+
+@media (max-width: 768px) {
+    .projects-section,
+    .project-section {
+        margin: 40px 16px 60px 16px;
+    }
+    .projects-header h2,
+    .project-header h2 {
+        font-size: 2rem;
+        letter-spacing: 3px;
+    }
+    .project-card {
+        grid-template-columns: 1fr;
+    }
+    .project-logo {
+        border-left: none;
+        border-top: 1px solid var(--line-color);
+        min-height: 140px;
+    }
 }
