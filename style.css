@@ -157,15 +157,20 @@ body{
     border-top: 1px solid var(--line-color) ;
     border-bottom: 1px solid var(--line-color);
     margin-top: 24px;
-    padding: 40px 40px;
-
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .Hero-name h1{
     font-family:var(--font-mono);
     font-size: 6.5rem;
     letter-spacing: 30px;
+    margin-right: -30px;
     line-height: 1;
+    text-align: center;
 }
 
 .left-bio{
@@ -176,6 +181,8 @@ body{
     justify-content: space-between;
     min-height: 340px;
     border-bottom: 1px solid var(--line-color);
+    font-size: 1.2rem;
+    line-height: 1.3rem;
 }
 
 .avatar-container{
