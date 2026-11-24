@@ -2,6 +2,8 @@ function initAvatar() {
     const canvas = document.getElementById('webgl-canvas');
     const container = document.querySelector('.avatar-container');
     if (!canvas || !container) return;
+    if (canvas.dataset.initialized) return;
+    canvas.dataset.initialized = 'true';
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -48,6 +50,8 @@ function initMintSnapLogo() {
     const canvas = document.getElementById('project-logo-canvas');
     const container = document.querySelector('.project-logo');
     if (!canvas || !container) return;
+    if (canvas.dataset.initialized) return;
+    canvas.dataset.initialized = 'true';
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
@@ -212,12 +216,257 @@ function initMintSnapLogo() {
     animateLogo();
 }
 
+function initCalculatorLogo() {
+    const canvas = document.getElementById('project-calculator-canvas');
+    const cards = document.querySelectorAll('.project-card');
+    const container = cards[1] ? cards[1].querySelector('.project-logo') : null;
+    if (!canvas || !container) return;
+    if (canvas.dataset.initialized) return;
+    canvas.dataset.initialized = 'true';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 4.6);
+
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        alpha: true,
+        antialias: true
+    });
+
+    function resize() {
+        if (!container) return;
+        const size = Math.min(container.clientWidth, container.clientHeight, 160) || 150;
+        renderer.setSize(size, size);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        camera.aspect = 1;
+        camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const calcGroup = new THREE.Group();
+    scene.add(calcGroup);
+
+    const bodyW = 1.84;
+    const bodyH = 2.7;
+    const r = 0.18;
+    const bodyShape = new THREE.Shape();
+    bodyShape.moveTo(-bodyW / 2 + r, -bodyH / 2);
+    bodyShape.lineTo(bodyW / 2 - r, -bodyH / 2);
+    bodyShape.quadraticCurveTo(bodyW / 2, -bodyH / 2, bodyW / 2, -bodyH / 2 + r);
+    bodyShape.lineTo(bodyW / 2, bodyH / 2 - r);
+    bodyShape.quadraticCurveTo(bodyW / 2, bodyH / 2, bodyW / 2 - r, bodyH / 2);
+    bodyShape.lineTo(-bodyW / 2 + r, bodyH / 2);
+    bodyShape.quadraticCurveTo(-bodyW / 2, bodyH / 2, -bodyW / 2, bodyH / 2 - r);
+    bodyShape.lineTo(-bodyW / 2, -bodyH / 2 + r);
+    bodyShape.quadraticCurveTo(-bodyW / 2, -bodyH / 2, -bodyW / 2 + r, -bodyH / 2);
+
+    const bodyGeo = new THREE.ExtrudeGeometry(bodyShape, {
+        depth: 0.22,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0.03,
+        bevelSegments: 2
+    });
+    bodyGeo.center();
+
+    const darkMat = new THREE.MeshBasicMaterial({
+        color: 0x141414,
+        transparent: true,
+        opacity: 0.88,
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1
+    });
+    const orangeWireMat = new THREE.MeshBasicMaterial({
+        color: 0xff5b14,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.35
+    });
+    const orangeLineMat = new THREE.LineBasicMaterial({
+        color: 0xff5b14,
+        linewidth: 2
+    });
+    const brightLineMat = new THREE.LineBasicMaterial({
+        color: 0xff8547,
+        linewidth: 2
+    });
+
+    calcGroup.add(new THREE.Mesh(bodyGeo, darkMat));
+    calcGroup.add(new THREE.Mesh(bodyGeo, orangeWireMat));
+    calcGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(bodyGeo, 20), orangeLineMat));
+
+    const solarGeo = new THREE.BoxGeometry(1.1, 0.16, 0.02);
+    const solarMesh = new THREE.Mesh(solarGeo, new THREE.MeshBasicMaterial({ color: 0x0d0d0d }));
+    solarMesh.position.set(0, 1.05, 0.13);
+    calcGroup.add(solarMesh);
+    const solarEdges = new THREE.LineSegments(new THREE.EdgesGeometry(solarGeo), orangeLineMat);
+    solarEdges.position.copy(solarMesh.position);
+    calcGroup.add(solarEdges);
+
+    const solarGridPts = [];
+    [-0.33, 0, 0.33].forEach(x => {
+        solarGridPts.push(new THREE.Vector3(x, 1.05 - 0.08, 0.141));
+        solarGridPts.push(new THREE.Vector3(x, 1.05 + 0.08, 0.141));
+    });
+    const solarLinesGeo = new THREE.BufferGeometry().setFromPoints(solarGridPts);
+    calcGroup.add(new THREE.LineSegments(solarLinesGeo, brightLineMat));
+
+    const screenGeo = new THREE.BoxGeometry(1.45, 0.42, 0.02);
+    const screenMesh = new THREE.Mesh(screenGeo, new THREE.MeshBasicMaterial({ color: 0x050505 }));
+    screenMesh.position.set(0, 0.72, 0.13);
+    calcGroup.add(screenMesh);
+    const screenEdges = new THREE.LineSegments(new THREE.EdgesGeometry(screenGeo), brightLineMat);
+    screenEdges.position.copy(screenMesh.position);
+    calcGroup.add(screenEdges);
+
+    const readoutPts = [];
+    function addSeg(x1, y1, x2, y2) {
+        readoutPts.push(new THREE.Vector3(x1, y1, 0.142));
+        readoutPts.push(new THREE.Vector3(x2, y2, 0.142));
+    }
+    function drawDigit(cx, cy, w, h, segs) {
+        const xL = cx - w / 2, xR = cx + w / 2;
+        const yB = cy - h / 2, yM = cy, yT = cy + h / 2;
+        if (segs.includes('a')) addSeg(xL, yT, xR, yT);
+        if (segs.includes('b')) addSeg(xR, yM, xR, yT);
+        if (segs.includes('c')) addSeg(xR, yB, xR, yM);
+        if (segs.includes('d')) addSeg(xL, yB, xR, yB);
+        if (segs.includes('e')) addSeg(xL, yB, xL, yM);
+        if (segs.includes('f')) addSeg(xL, yM, xL, yT);
+        if (segs.includes('g')) addSeg(xL, yM, xR, yM);
+    }
+    const dw = 0.13, dh = 0.24, dy = 0.72;
+    drawDigit(-0.48, dy, dw, dh, ['a', 'b', 'c', 'e', 'f', 'g']);
+    addSeg(-0.29, dy, -0.21, dy);
+    addSeg(-0.25, dy - 0.04, -0.25, dy + 0.04);
+    drawDigit(0.05, dy, dw, dh, ['f', 'g', 'b', 'c']);
+    addSeg(0.18, dy - dh / 2, 0.19, dy - dh / 2);
+    drawDigit(0.36, dy, dw, dh, ['a', 'b', 'c', 'd', 'e', 'f']);
+
+    const readoutGeo = new THREE.BufferGeometry().setFromPoints(readoutPts);
+    calcGroup.add(new THREE.LineSegments(readoutGeo, brightLineMat));
+
+    const keyGeo = new THREE.BoxGeometry(0.28, 0.18, 0.08);
+    const keyEdgesGeo = new THREE.EdgesGeometry(keyGeo);
+    const keyDarkMat = new THREE.MeshBasicMaterial({ color: 0x181818 });
+    const keyAccentMat = new THREE.MeshBasicMaterial({ color: 0x2a140a });
+
+    const keySymbolsPts = [];
+    function addKeySym(x1, y1, x2, y2) {
+        keySymbolsPts.push(new THREE.Vector3(x1, y1, 0.182));
+        keySymbolsPts.push(new THREE.Vector3(x2, y2, 0.182));
+    }
+
+    const cols = [-0.51, -0.17, 0.17, 0.51];
+    const rows = [0.34, 0.08, -0.18, -0.44, -0.70];
+
+    rows.forEach((ry, rIdx) => {
+        cols.forEach((cx, cIdx) => {
+            const isOp = cIdx === 3 || rIdx === 0;
+            const kMesh = new THREE.Mesh(keyGeo, isOp ? keyAccentMat : keyDarkMat);
+            kMesh.position.set(cx, ry, 0.14);
+            calcGroup.add(kMesh);
+
+            const kEdge = new THREE.LineSegments(keyEdgesGeo, isOp ? brightLineMat : orangeLineMat);
+            kEdge.position.copy(kMesh.position);
+            calcGroup.add(kEdge);
+
+            const sw = 0.06, sh = 0.06;
+            if (cIdx === 3) {
+                if (rIdx === 0) {
+                    addKeySym(cx - sw, ry, cx + sw, ry);
+                    addKeySym(cx, ry + 0.035, cx, ry + 0.035);
+                    addKeySym(cx, ry - 0.035, cx, ry - 0.035);
+                } else if (rIdx === 1) {
+                    addKeySym(cx - sw, ry - sh, cx + sw, ry + sh);
+                    addKeySym(cx - sw, ry + sh, cx + sw, ry - sh);
+                } else if (rIdx === 2) {
+                    addKeySym(cx - sw, ry, cx + sw, ry);
+                } else if (rIdx === 3) {
+                    addKeySym(cx - sw, ry, cx + sw, ry);
+                    addKeySym(cx, ry - sh, cx, ry + sh);
+                } else if (rIdx === 4) {
+                    addKeySym(cx - sw, ry + 0.025, cx + sw, ry + 0.025);
+                    addKeySym(cx - sw, ry - 0.025, cx + sw, ry - 0.025);
+                }
+            } else if (rIdx === 4 && cIdx === 2) {
+                addKeySym(cx - sw, ry + 0.025, cx + sw, ry + 0.025);
+                addKeySym(cx - sw, ry - 0.025, cx + sw, ry - 0.025);
+            } else if (rIdx === 4 && cIdx === 1) {
+                addKeySym(cx - 0.01, ry - sh / 2, cx + 0.01, ry - sh / 2);
+            } else if (rIdx === 0 && cIdx === 0) {
+                addKeySym(cx + sw, ry + sh, cx - sw, ry + sh);
+                addKeySym(cx - sw, ry + sh, cx - sw, ry - sh);
+                addKeySym(cx - sw, ry - sh, cx + sw, ry - sh);
+            } else {
+                addKeySym(cx - sw, ry - sh, cx + sw, ry - sh);
+                addKeySym(cx, ry - sh, cx, ry + sh);
+            }
+        });
+    });
+
+    const keySymbolsGeo = new THREE.BufferGeometry().setFromPoints(keySymbolsPts);
+    calcGroup.add(new THREE.LineSegments(keySymbolsGeo, orangeLineMat));
+
+    calcGroup.position.set(0, -0.05, 0);
+
+    let targetRotX = 0;
+    let targetRotY = 0;
+    let isHovered = false;
+
+    const projectCard = cards[1];
+    if (projectCard) {
+        projectCard.addEventListener('mouseenter', () => { isHovered = true; });
+        projectCard.addEventListener('mouseleave', () => {
+            isHovered = false;
+            targetRotX = 0;
+            targetRotY = 0;
+        });
+        projectCard.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            const relX = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+            const relY = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+            targetRotY = relX * 0.7;
+            targetRotX = -relY * 0.5;
+        });
+    }
+
+    const clock = new THREE.Clock();
+    function animateCalc() {
+        requestAnimationFrame(animateCalc);
+        const elapsedTime = clock.getElapsedTime();
+
+        const speed = isHovered ? 0.025 : 0.012;
+        calcGroup.rotation.y += speed;
+
+        calcGroup.position.y = -0.05 + Math.sin(elapsedTime * 2 + 1.2) * 0.06;
+
+        if (isHovered) {
+            calcGroup.rotation.x += (targetRotX - calcGroup.rotation.x) * 0.08;
+            calcGroup.rotation.z += (-targetRotY * 0.3 - calcGroup.rotation.z) * 0.08;
+        } else {
+            const idleRotX = Math.sin(elapsedTime * 1.2 + 0.8) * 0.12;
+            const idleRotZ = Math.cos(elapsedTime * 0.9 + 0.8) * 0.06;
+            calcGroup.rotation.x += (idleRotX - calcGroup.rotation.x) * 0.05;
+            calcGroup.rotation.z += (idleRotZ - calcGroup.rotation.z) * 0.05;
+        }
+
+        renderer.render(scene, camera);
+    }
+    animateCalc();
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     initAvatar();
     initMintSnapLogo();
+    initCalculatorLogo();
 });
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     initAvatar();
     initMintSnapLogo();
+    initCalculatorLogo();
 }

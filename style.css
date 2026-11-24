@@ -343,6 +343,10 @@ body{
     transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
+.project-card:not(:last-child) {
+    margin-bottom: 32px;
+}
+
 .project-card:hover {
     background-color: #ededed;
     border-color: var(--accent-orange);
@@ -424,7 +428,7 @@ body{
     text-decoration: none;
     cursor: pointer;
     clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-    margin-left: 550px;
+    margin-left: auto;
     transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
 }
 
@@ -457,7 +461,9 @@ body{
     min-height: 180px;
 }
 
-#project-logo-canvas {
+#project-logo-canvas,
+#project-calculator-canvas,
+.project-logo-canvas {
     width: 150px;
     height: 150px;
     display: block;
@@ -466,7 +472,9 @@ body{
     transition: transform 0.3s ease;
 }
 
-.project-card:hover #project-logo-canvas {
+.project-card:hover #project-logo-canvas,
+.project-card:hover #project-calculator-canvas,
+.project-card:hover .project-logo-canvas {
     transform: scale(1.08);
 }
 
