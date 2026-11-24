@@ -182,8 +182,8 @@ body{
     justify-content: space-between;
     min-height: 340px;
     border-bottom: 1px solid var(--line-color);
-    font-size: 1.2rem;
-    line-height: 1.3rem;
+    font-size: 1.15rem;
+    line-height: 1.55;
 }
 
 .avatar-container{
