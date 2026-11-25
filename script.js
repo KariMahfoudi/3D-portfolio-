@@ -123,10 +123,13 @@ function initAvatar() {
     }
     uvAttr.needsUpdate = true;
 
-    const faceSrc = window.FACE_ORANGE_DATA_URL || 'pics/face-orange.png';
-    const faceTexture = new THREE.TextureLoader().load(faceSrc);
+    const textureLoader = new THREE.TextureLoader();
+    const faceClosedSrc = window.FACE_CLOSED_DATA_URL || 'pics/face-closed.jpg';
+    const faceOpenSrc = window.FACE_OPEN_DATA_URL || 'pics/face-open.jpg';
+    const faceClosedTexture = textureLoader.load(faceClosedSrc);
+    const faceOpenTexture = textureLoader.load(faceOpenSrc);
     const faceScreenMat = new THREE.MeshBasicMaterial({
-        map: faceTexture
+        map: faceClosedTexture
     });
     const faceScreenMesh = new THREE.Mesh(screenGeo, faceScreenMat);
     faceScreenMesh.position.set(0, 0, 0.579);
@@ -244,12 +247,23 @@ function initAvatar() {
     let targetRotX = 0;
     let targetRotY = 0;
     let isHovered = false;
+    let isScreenHovered = false;
+    const raycaster = new THREE.Raycaster();
+    const mouseNdc = new THREE.Vector2();
+
+    function setScreenMouth(open) {
+        if (isScreenHovered === open) return;
+        isScreenHovered = open;
+        faceScreenMat.map = open ? faceOpenTexture : faceClosedTexture;
+        faceScreenMat.needsUpdate = true;
+    }
 
     container.addEventListener('mouseenter', () => { isHovered = true; });
     container.addEventListener('mouseleave', () => {
         isHovered = false;
         targetRotX = 0;
         targetRotY = 0;
+        setScreenMouth(false);
     });
     container.addEventListener('mousemove', (e) => {
         const rect = container.getBoundingClientRect();
@@ -259,6 +273,12 @@ function initAvatar() {
         const relY = (e.clientY - centerY) / (rect.height / 2);
         targetRotY = Math.max(-0.45, Math.min(0.45, relX * 0.45));
         targetRotX = Math.max(-0.25, Math.min(0.25, relY * 0.25));
+
+        mouseNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouseNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouseNdc, camera);
+        const hits = raycaster.intersectObject(headGroup, true);
+        setScreenMouth(hits.length > 0);
     });
 
     const clock = new THREE.Clock();
@@ -489,8 +509,8 @@ function initMintSnapLogo() {
 
 function initCalculatorLogo() {
     const canvas = document.getElementById('project-calculator-canvas');
-    const cards = document.querySelectorAll('.project-card');
-    const container = cards[1] ? cards[1].querySelector('.project-logo') : null;
+    const projectCard = canvas ? canvas.closest('.project-card') : null;
+    const container = canvas ? canvas.parentElement : null;
     if (!canvas || !container) return;
     if (canvas.dataset.initialized) return;
     canvas.dataset.initialized = 'true';
@@ -733,7 +753,6 @@ function initCalculatorLogo() {
     let targetRotY = 0;
     let isHovered = false;
 
-    const projectCard = cards[1];
     if (projectCard) {
         projectCard.addEventListener('mouseenter', () => { isHovered = true; });
         projectCard.addEventListener('mouseleave', () => {
@@ -985,9 +1004,153 @@ function initUnoFlipLogo() {
     animateUno();
 }
 
+function initPortfolioLogo() {
+    const canvas = document.getElementById('project-portfolio-canvas');
+    const projectCard = canvas ? canvas.closest('.project-card') : null;
+    const container = canvas ? canvas.parentElement : null;
+    if (!canvas || !container) return;
+    if (canvas.dataset.initialized) return;
+    canvas.dataset.initialized = 'true';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 4.4);
+
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        alpha: true,
+        antialias: true
+    });
+
+    function resize() {
+        if (!container) return;
+        const size = Math.min(container.clientWidth, container.clientHeight, 160) || 150;
+        renderer.setSize(size, size);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        camera.aspect = 1;
+        camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const contactGroup = new THREE.Group();
+    scene.add(contactGroup);
+
+    const darkMat = new THREE.MeshBasicMaterial({
+        color: 0x141414,
+        transparent: true,
+        opacity: 0.9,
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1
+    });
+    const orangeWireMat = new THREE.MeshBasicMaterial({
+        color: 0xff5b14,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.45
+    });
+    const orangeLineMat = new THREE.LineBasicMaterial({ color: 0xff5b14 });
+    const brightLineMat = new THREE.LineBasicMaterial({ color: 0xff8547 });
+
+    const ringGeo = new THREE.TorusGeometry(1.08, 0.055, 14, 48);
+    contactGroup.add(new THREE.Mesh(ringGeo, darkMat));
+    contactGroup.add(new THREE.Mesh(ringGeo, orangeWireMat));
+
+    const outerCirclePts = [];
+    for (let i = 0; i <= 64; i++) {
+        const a = (i / 64) * Math.PI * 2;
+        outerCirclePts.push(new THREE.Vector3(Math.cos(a) * 1.14, Math.sin(a) * 1.14, 0));
+    }
+    contactGroup.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(outerCirclePts), brightLineMat));
+
+    const headGeo = new THREE.SphereGeometry(0.36, 18, 14);
+    const headDark = new THREE.Mesh(headGeo, darkMat);
+    const headWire = new THREE.Mesh(headGeo, orangeWireMat);
+    headDark.position.set(0, 0.34, 0);
+    headWire.position.set(0, 0.34, 0);
+    contactGroup.add(headDark);
+    contactGroup.add(headWire);
+
+    const headHaloGeo = new THREE.TorusGeometry(0.37, 0.015, 10, 32);
+    const headHalo = new THREE.Mesh(headHaloGeo, new THREE.MeshBasicMaterial({ color: 0xff8547 }));
+    headHalo.position.set(0, 0.34, 0);
+    contactGroup.add(headHalo);
+
+    const shoulderShape = new THREE.Shape();
+    shoulderShape.moveTo(-0.68, -0.68);
+    shoulderShape.quadraticCurveTo(-0.66, -0.14, 0, -0.14);
+    shoulderShape.quadraticCurveTo(0.66, -0.14, 0.68, -0.68);
+    shoulderShape.quadraticCurveTo(0.36, -0.88, 0, -0.88);
+    shoulderShape.quadraticCurveTo(-0.36, -0.88, -0.68, -0.68);
+
+    const shoulderGeo = new THREE.ExtrudeGeometry(shoulderShape, {
+        depth: 0.24,
+        bevelEnabled: true,
+        bevelThickness: 0.05,
+        bevelSize: 0.04,
+        bevelSegments: 3
+    });
+    shoulderGeo.center();
+
+    const shoulderDark = new THREE.Mesh(shoulderGeo, darkMat);
+    const shoulderWire = new THREE.Mesh(shoulderGeo, orangeWireMat);
+    const shoulderEdges = new THREE.LineSegments(new THREE.EdgesGeometry(shoulderGeo, 20), brightLineMat);
+    shoulderDark.position.set(0, -0.48, 0);
+    shoulderWire.position.set(0, -0.48, 0);
+    shoulderEdges.position.set(0, -0.48, 0);
+    contactGroup.add(shoulderDark);
+    contactGroup.add(shoulderWire);
+    contactGroup.add(shoulderEdges);
+
+    let targetRotX = 0;
+    let targetRotY = 0;
+    let isHovered = false;
+
+    if (projectCard) {
+        projectCard.addEventListener('mouseenter', () => { isHovered = true; });
+        projectCard.addEventListener('mouseleave', () => {
+            isHovered = false;
+            targetRotX = 0;
+            targetRotY = 0;
+        });
+        projectCard.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            const relX = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+            const relY = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+            targetRotY = relX * 0.7;
+            targetRotX = -relY * 0.5;
+        });
+    }
+
+    const clock = new THREE.Clock();
+    function animateContact() {
+        requestAnimationFrame(animateContact);
+        const elapsedTime = clock.getElapsedTime();
+
+        const speed = isHovered ? 0.025 : 0.012;
+        contactGroup.rotation.y += speed;
+        contactGroup.position.y = Math.sin(elapsedTime * 2 + 0.4) * 0.06;
+
+        if (isHovered) {
+            contactGroup.rotation.x += (targetRotX - contactGroup.rotation.x) * 0.08;
+            contactGroup.rotation.z += (-targetRotY * 0.3 - contactGroup.rotation.z) * 0.08;
+        } else {
+            const idleRotX = Math.sin(elapsedTime * 1.2) * 0.12;
+            const idleRotZ = Math.cos(elapsedTime * 0.9) * 0.06;
+            contactGroup.rotation.x += (idleRotX - contactGroup.rotation.x) * 0.05;
+            contactGroup.rotation.z += (idleRotZ - contactGroup.rotation.z) * 0.05;
+        }
+
+        renderer.render(scene, camera);
+    }
+    animateContact();
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     initAvatar();
     initMintSnapLogo();
+    initPortfolioLogo();
     initCalculatorLogo();
     initUnoFlipLogo();
 });
@@ -995,6 +1158,7 @@ window.addEventListener('DOMContentLoaded', () => {
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     initAvatar();
     initMintSnapLogo();
+    initPortfolioLogo();
     initCalculatorLogo();
     initUnoFlipLogo();
 }
