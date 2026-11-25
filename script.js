@@ -682,6 +682,51 @@ function initCalculatorLogo() {
     const keySymbolsGeo = new THREE.BufferGeometry().setFromPoints(keySymbolsPts);
     calcGroup.add(new THREE.LineSegments(keySymbolsGeo, orangeLineMat));
 
+    const backZ = -0.142;
+    const orangeSolidMat = new THREE.MeshBasicMaterial({ color: 0xff5b14 });
+    const brightSolidMat = new THREE.MeshBasicMaterial({ color: 0xff8547 });
+
+    const backFrameGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(1.52, 2.34, 0.01));
+    const backFrame = new THREE.LineSegments(backFrameGeo, orangeLineMat);
+    backFrame.position.set(0, 0, backZ);
+    calcGroup.add(backFrame);
+
+    [0.92, 0.78, 0.64, 0.50].forEach((vy) => {
+        const ventGeo = new THREE.BoxGeometry(1.18, 0.055, 0.015);
+        const ventMesh = new THREE.Mesh(ventGeo, orangeSolidMat);
+        ventMesh.position.set(0, vy, backZ - 0.005);
+        calcGroup.add(ventMesh);
+    });
+
+    const battGeo = new THREE.BoxGeometry(1.22, 0.96, 0.02);
+    const battMesh = new THREE.Mesh(battGeo, new THREE.MeshBasicMaterial({ color: 0x0e0e0e }));
+    battMesh.position.set(0, -0.48, backZ - 0.006);
+    calcGroup.add(battMesh);
+    const battEdges = new THREE.LineSegments(new THREE.EdgesGeometry(battGeo), brightLineMat);
+    battEdges.position.copy(battMesh.position);
+    calcGroup.add(battEdges);
+
+    const latchGeo = new THREE.BoxGeometry(0.36, 0.07, 0.025);
+    const latchMesh = new THREE.Mesh(latchGeo, brightSolidMat);
+    latchMesh.position.set(0, -0.04, backZ - 0.012);
+    calcGroup.add(latchMesh);
+
+    const emblemPts = [
+        new THREE.Vector3(0, -0.24, backZ - 0.018),
+        new THREE.Vector3(0.24, -0.48, backZ - 0.018),
+        new THREE.Vector3(0, -0.72, backZ - 0.018),
+        new THREE.Vector3(-0.24, -0.48, backZ - 0.018)
+    ];
+    calcGroup.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(emblemPts), brightLineMat));
+
+    const screwGeo = new THREE.RingGeometry(0.028, 0.05, 12);
+    [[-0.64, 1.06], [0.64, 1.06], [-0.64, -1.06], [0.64, -1.06]].forEach(([sx, sy]) => {
+        const screw = new THREE.Mesh(screwGeo, orangeSolidMat);
+        screw.rotation.y = Math.PI;
+        screw.position.set(sx, sy, backZ - 0.003);
+        calcGroup.add(screw);
+    });
+
     calcGroup.position.set(0, -0.05, 0);
 
     let targetRotX = 0;
