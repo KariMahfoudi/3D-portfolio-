@@ -730,14 +730,226 @@ function initCalculatorLogo() {
     animateCalc();
 }
 
+function initUnoFlipLogo() {
+    const canvas = document.getElementById('project-uno-canvas');
+    const cardEl = document.getElementById('uno-flip-card');
+    const container = cardEl ? cardEl.querySelector('.project-logo') : null;
+    if (!canvas || !container) return;
+    if (canvas.dataset.initialized) return;
+    canvas.dataset.initialized = 'true';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 4.4);
+
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        alpha: true,
+        antialias: true
+    });
+
+    function resize() {
+        if (!container) return;
+        const size = Math.min(container.clientWidth, container.clientHeight, 160) || 150;
+        renderer.setSize(size, size);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        camera.aspect = 1;
+        camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const cardGroup = new THREE.Group();
+    scene.add(cardGroup);
+
+    function createCardShape(w, h, r) {
+        const s = new THREE.Shape();
+        const x = -w / 2;
+        const y = -h / 2;
+        s.moveTo(x + r, y);
+        s.lineTo(x + w - r, y);
+        s.quadraticCurveTo(x + w, y, x + w, y + r);
+        s.lineTo(x + w, y + h - r);
+        s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        s.lineTo(x + r, y + h);
+        s.quadraticCurveTo(x, y + h, x, y + h - r);
+        s.lineTo(x, y + r);
+        s.quadraticCurveTo(x, y, x + r, y);
+        return s;
+    }
+
+    const cardShape = createCardShape(1.56, 2.34, 0.18);
+    const cardGeo = new THREE.ExtrudeGeometry(cardShape, {
+        depth: 0.05,
+        bevelEnabled: true,
+        bevelThickness: 0.02,
+        bevelSize: 0.02,
+        bevelSegments: 3
+    });
+    cardGeo.center();
+
+    const darkBodyMat = new THREE.MeshBasicMaterial({
+        color: 0x121212,
+        transparent: true,
+        opacity: 0.94,
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1
+    });
+    const orangeWireMat = new THREE.MeshBasicMaterial({
+        color: 0xff5b14,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.25
+    });
+    const orangeLineMat = new THREE.LineBasicMaterial({ color: 0xff5b14 });
+    const brightLineMat = new THREE.LineBasicMaterial({ color: 0xff8547 });
+
+    cardGroup.add(new THREE.Mesh(cardGeo, darkBodyMat));
+    cardGroup.add(new THREE.Mesh(cardGeo, orangeWireMat));
+    cardGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(cardGeo, 20), orangeLineMat));
+
+    function addInnerFrame(zPos, mat) {
+        const frameShape = createCardShape(1.36, 2.12, 0.12);
+        const pts = frameShape.getPoints(48).map(p => new THREE.Vector3(p.x, p.y, zPos));
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        cardGroup.add(new THREE.LineLoop(geo, mat));
+    }
+
+    function addTiltedOval(zPos, mat, rx, ry) {
+        const curve = new THREE.EllipseCurve(0, 0, rx, ry, 0, Math.PI * 2, false, 0);
+        const pts2D = curve.getPoints(48);
+        const tilt = 0.42;
+        const cosT = Math.cos(tilt);
+        const sinT = Math.sin(tilt);
+        const pts3D = pts2D.map(p => new THREE.Vector3(
+            p.x * cosT - p.y * sinT,
+            p.x * sinT + p.y * cosT,
+            zPos
+        ));
+        const geo = new THREE.BufferGeometry().setFromPoints(pts3D);
+        cardGroup.add(new THREE.LineLoop(geo, mat));
+    }
+
+    function addArcArrow(cx, cy, r, startA, endA, zPos, mat, arrowAtEnd) {
+        const pts = [];
+        const segs = 18;
+        for (let i = 0; i <= segs; i++) {
+            const a = startA + (endA - startA) * (i / segs);
+            pts.push(new THREE.Vector3(cx + Math.cos(a) * r, cy + Math.sin(a) * r, zPos));
+        }
+        cardGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat));
+
+        const tipAngle = arrowAtEnd ? endA : startA;
+        const tx = cx + Math.cos(tipAngle) * r;
+        const ty = cy + Math.sin(tipAngle) * r;
+        const dir = endA > startA ? 1 : -1;
+        const tangent = tipAngle + dir * (Math.PI / 2);
+        const headSize = 0.11;
+        const a1 = tangent - 2.55;
+        const a2 = tangent + 2.55;
+        const headPts = [
+            new THREE.Vector3(tx + Math.cos(a1) * headSize, ty + Math.sin(a1) * headSize, zPos),
+            new THREE.Vector3(tx, ty, zPos),
+            new THREE.Vector3(tx + Math.cos(a2) * headSize, ty + Math.sin(a2) * headSize, zPos)
+        ];
+        cardGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(headPts), mat));
+    }
+
+    function addMiniFlipIcon(cx, cy, zPos, mat) {
+        addArcArrow(cx, cy, 0.085, 0.25, Math.PI - 0.15, zPos, mat, true);
+        addArcArrow(cx, cy, 0.085, Math.PI + 0.25, Math.PI * 2 - 0.15, zPos, mat, true);
+    }
+
+    const frontZ = 0.048;
+    addInnerFrame(frontZ, orangeLineMat);
+    addTiltedOval(frontZ, orangeLineMat, 0.60, 0.92);
+    addTiltedOval(frontZ, brightLineMat, 0.53, 0.84);
+    addArcArrow(0, 0, 0.34, 0.35, Math.PI - 0.25, frontZ + 0.004, brightLineMat, true);
+    addArcArrow(0, 0, 0.34, Math.PI + 0.35, Math.PI * 2 - 0.25, frontZ + 0.004, brightLineMat, true);
+    addMiniFlipIcon(-0.50, 0.86, frontZ + 0.002, brightLineMat);
+    addMiniFlipIcon(0.50, -0.86, frontZ + 0.002, brightLineMat);
+
+    const backZ = -0.048;
+    addInnerFrame(backZ, brightLineMat);
+    addTiltedOval(backZ, orangeLineMat, 0.60, 0.92);
+
+    const backPts = [];
+    function addBackSeg(x1, y1, x2, y2) {
+        backPts.push(new THREE.Vector3(x1, y1, backZ - 0.004));
+        backPts.push(new THREE.Vector3(x2, y2, backZ - 0.004));
+    }
+    addBackSeg(0.16, 0.0, 0.34, 0.0);
+    addBackSeg(0.25, -0.10, 0.25, 0.10);
+    addBackSeg(-0.02, 0.22, -0.26, 0.22);
+    addBackSeg(-0.02, 0.22, -0.02, 0.02);
+    addBackSeg(-0.02, 0.02, -0.26, 0.02);
+    addBackSeg(-0.26, 0.02, -0.26, -0.22);
+    addBackSeg(-0.26, -0.22, -0.02, -0.22);
+
+    addBackSeg(0.56, 0.86, 0.44, 0.86);
+    addBackSeg(0.50, 0.80, 0.50, 0.92);
+    addBackSeg(-0.44, -0.86, -0.56, -0.86);
+    addBackSeg(-0.50, -0.80, -0.50, -0.92);
+
+    cardGroup.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(backPts), brightLineMat));
+
+    cardGroup.rotation.z = -0.1;
+
+    let targetRotX = 0;
+    let targetRotZ = -0.1;
+    let isHovered = false;
+
+    if (cardEl) {
+        cardEl.addEventListener('mouseenter', () => { isHovered = true; });
+        cardEl.addEventListener('mouseleave', () => {
+            isHovered = false;
+            targetRotX = 0;
+            targetRotZ = -0.1;
+        });
+        cardEl.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            const relX = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+            const relY = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+            targetRotX = -relY * 0.45;
+            targetRotZ = -0.1 - relX * 0.25;
+        });
+    }
+
+    const clock = new THREE.Clock();
+    function animateUno() {
+        requestAnimationFrame(animateUno);
+        const elapsedTime = clock.getElapsedTime();
+
+        const speed = isHovered ? 0.032 : 0.015;
+        cardGroup.rotation.y += speed;
+        cardGroup.position.y = Math.sin(elapsedTime * 2 + 0.6) * 0.06;
+
+        if (isHovered) {
+            cardGroup.rotation.x += (targetRotX - cardGroup.rotation.x) * 0.08;
+            cardGroup.rotation.z += (targetRotZ - cardGroup.rotation.z) * 0.08;
+        } else {
+            const idleRotX = Math.sin(elapsedTime * 1.1) * 0.14;
+            const idleRotZ = -0.1 + Math.cos(elapsedTime * 0.8) * 0.05;
+            cardGroup.rotation.x += (idleRotX - cardGroup.rotation.x) * 0.05;
+            cardGroup.rotation.z += (idleRotZ - cardGroup.rotation.z) * 0.05;
+        }
+
+        renderer.render(scene, camera);
+    }
+    animateUno();
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     initAvatar();
     initMintSnapLogo();
     initCalculatorLogo();
+    initUnoFlipLogo();
 });
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     initAvatar();
     initMintSnapLogo();
     initCalculatorLogo();
+    initUnoFlipLogo();
 }

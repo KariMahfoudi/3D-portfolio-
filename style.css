@@ -478,6 +478,7 @@ body{
 
 #project-logo-canvas,
 #project-calculator-canvas,
+#project-uno-canvas,
 .project-logo-canvas {
     width: 150px;
     height: 150px;
@@ -489,6 +490,7 @@ body{
 
 .project-card:hover #project-logo-canvas,
 .project-card:hover #project-calculator-canvas,
+.project-card:hover #project-uno-canvas,
 .project-card:hover .project-logo-canvas {
     transform: scale(1.08);
 }
