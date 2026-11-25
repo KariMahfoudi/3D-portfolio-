@@ -28,16 +28,35 @@ body{
     background-color: var(--bg-main);
     background-image:
         radial-gradient(circle at 82% 18%, rgba(255, 91, 20, 0.08) 0%, transparent 42%),
-        radial-gradient(circle at 12% 72%, rgba(255, 91, 20, 0.05) 0%, transparent 45%),
-        linear-gradient(to right, rgba(189, 189, 189, 0.55) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(189, 189, 189, 0.55) 1px, transparent 1px),
-        linear-gradient(to right, rgba(189, 189, 189, 0.25) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(189, 189, 189, 0.25) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 128px 128px, 128px 128px, 32px 32px, 32px 32px;
+        radial-gradient(circle at 12% 72%, rgba(255, 91, 20, 0.05) 0%, transparent 45%);
     background-attachment: fixed;
     color: var(--text-dark);
     font-family: var(--font-mono);
     overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 44px;
+    right: 44px;
+    pointer-events: none;
+    z-index: 0;
+    border-left: 1px solid rgba(189, 189, 189, 0.55);
+    border-right: 1px solid rgba(189, 189, 189, 0.55);
+    background-image:
+        linear-gradient(to right, rgba(189, 189, 189, 0.55) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(189, 189, 189, 0.32) 1px, transparent 1px);
+    background-size: 25% 100%, 100% 240px;
+}
+
+.top-bar,
+.Workspace-stage {
+    position: relative;
+    z-index: 1;
 }
 .top-bar{
     display:grid;
@@ -609,6 +628,11 @@ body{
 }
 
 @media (max-width: 768px) {
+    body::before {
+        left: 16px;
+        right: 16px;
+        background-size: 50% 100%, 100% 200px;
+    }
     .contact-section {
         margin: 40px 16px 60px 16px;
     }
