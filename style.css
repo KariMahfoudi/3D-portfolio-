@@ -24,6 +24,7 @@ body{
     background-color: var(--bg-main);
     color: var(--text-dark);
     font-family: var(--font-mono);
+    overflow-x: hidden;
 }
 .top-bar{
     display:grid;
@@ -187,13 +188,16 @@ body{
 }
 
 .avatar-container{
-    grid-column: span 2;
+    grid-column: 2 / -1;
+    width: calc(100% + 44px);
+    margin-right: -44px;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 340px;
     border-bottom: 1px solid var(--line-color);
     position: relative;
+    overflow: hidden;
 }
 
 
@@ -497,6 +501,11 @@ body{
 }
 
 @media (max-width: 768px) {
+    .avatar-container {
+        grid-column: 1 / -1;
+        width: 100%;
+        margin-right: 0;
+    }
     .projects-section,
     .project-section {
         margin: 40px 16px 60px 16px;

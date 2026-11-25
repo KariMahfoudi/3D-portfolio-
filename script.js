@@ -6,44 +6,295 @@ function initAvatar() {
     canvas.dataset.initialized = 'true';
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.z = 3;
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.set(0, 0, 5.6);
 
     const renderer = new THREE.WebGLRenderer({
         canvas: canvas,
         alpha: true,
         antialias: true
     });
-
-    renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    const geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8);
-    const texture = new THREE.TextureLoader().load('pics/Screenshot 2026-10-29 205532.png');
-    const material = new THREE.MeshBasicMaterial({
-        map: texture,
-        transparent: true
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    keyLight.position.set(-3, 4, 6);
+    scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0xff5b14, 1.1);
+    rimLight.position.set(5, 2, -2);
+    scene.add(rimLight);
+
+    const fillLight = new THREE.PointLight(0xff8547, 0.5, 12);
+    fillLight.position.set(0, -1, 4);
+    scene.add(fillLight);
+
+    function createRoundedRectShape(w, h, r) {
+        const s = new THREE.Shape();
+        const x = -w / 2;
+        const y = -h / 2;
+        s.moveTo(x + r, y);
+        s.lineTo(x + w - r, y);
+        s.quadraticCurveTo(x + w, y, x + w, y + r);
+        s.lineTo(x + w, y + h - r);
+        s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        s.lineTo(x + r, y + h);
+        s.quadraticCurveTo(x, y + h, x, y + h - r);
+        s.lineTo(x, y + r);
+        s.quadraticCurveTo(x, y, x + r, y);
+        return s;
+    }
+
+    const headGroup = new THREE.Group();
+    scene.add(headGroup);
+
+    const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0x1e1e21,
+        roughness: 0.35,
+        metalness: 0.5
+    });
+    const darkMetalMat = new THREE.MeshStandardMaterial({
+        color: 0x141416,
+        roughness: 0.4,
+        metalness: 0.7
+    });
+    const orangeMat = new THREE.MeshStandardMaterial({
+        color: 0xff5b14,
+        emissive: 0xff5b14,
+        emissiveIntensity: 0.35,
+        roughness: 0.25,
+        metalness: 0.3
+    });
+    const screenMat = new THREE.MeshStandardMaterial({
+        color: 0x070709,
+        roughness: 0.12,
+        metalness: 0.25
     });
 
-    const wireframobj = new THREE.Mesh(geometry, material);
-    scene.add(wireframobj);
+    const shellShape = createRoundedRectShape(2.45, 1.72, 0.42);
+    const shellGeo = new THREE.ExtrudeGeometry(shellShape, {
+        depth: 0.78,
+        bevelEnabled: true,
+        bevelThickness: 0.16,
+        bevelSize: 0.15,
+        bevelSegments: 8,
+        curveSegments: 16
+    });
+    shellGeo.center();
+    const shellMesh = new THREE.Mesh(shellGeo, bodyMat);
+    headGroup.add(shellMesh);
 
-    function animate() {
-        requestAnimationFrame(animate);
-        wireframobj.rotation.x += 0.005;
-        wireframobj.rotation.y += 0.01;
-        renderer.render(scene, camera);
+    const bezelShape = createRoundedRectShape(2.26, 1.54, 0.34);
+    const bezelGeo = new THREE.ExtrudeGeometry(bezelShape, {
+        depth: 0.06,
+        bevelEnabled: true,
+        bevelThickness: 0.025,
+        bevelSize: 0.02,
+        bevelSegments: 3,
+        curveSegments: 14
+    });
+    bezelGeo.center();
+    const bezelMesh = new THREE.Mesh(bezelGeo, darkMetalMat);
+    bezelMesh.position.set(0, 0, 0.52);
+    headGroup.add(bezelMesh);
+
+    const trimShape = createRoundedRectShape(2.14, 1.44, 0.3);
+    const trimPoints = trimShape.getPoints(56).map(p => new THREE.Vector3(p.x, p.y, 0.565));
+    const trimGeo = new THREE.BufferGeometry().setFromPoints(trimPoints);
+    const trimLine = new THREE.LineLoop(trimGeo, new THREE.LineBasicMaterial({ color: 0xff5b14 }));
+    headGroup.add(trimLine);
+
+    const screenShape = createRoundedRectShape(2.08, 1.38, 0.28);
+    const screenGeo = new THREE.ShapeGeometry(screenShape, 16);
+    const faceScreenMesh = new THREE.Mesh(screenGeo, screenMat);
+    faceScreenMesh.position.set(0, 0, 0.568);
+    headGroup.add(faceScreenMesh);
+
+    const antBaseGeo = new THREE.CylinderGeometry(0.08, 0.11, 0.08, 16);
+    const antBase = new THREE.Mesh(antBaseGeo, darkMetalMat);
+    antBase.position.set(0, 1.04, -0.05);
+    headGroup.add(antBase);
+
+    const antRodGeo = new THREE.CylinderGeometry(0.02, 0.025, 0.3, 12);
+    const antRod = new THREE.Mesh(antRodGeo, darkMetalMat);
+    antRod.position.set(0, 1.21, -0.05);
+    headGroup.add(antRod);
+
+    const antTipGeo = new THREE.SphereGeometry(0.045, 14, 14);
+    const antTip = new THREE.Mesh(antTipGeo, orangeMat);
+    antTip.position.set(0, 1.37, -0.05);
+    headGroup.add(antTip);
+
+    const socketGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.18, 20);
+    socketGeo.rotateZ(Math.PI / 2);
+    const socketMesh = new THREE.Mesh(socketGeo, darkMetalMat);
+    socketMesh.position.set(1.38, 0, -0.08);
+    headGroup.add(socketMesh);
+
+    const socketRingGeo = new THREE.TorusGeometry(0.165, 0.025, 12, 24);
+    socketRingGeo.rotateY(Math.PI / 2);
+    const socketRing = new THREE.Mesh(socketRingGeo, orangeMat);
+    socketRing.position.set(1.43, 0, -0.08);
+    headGroup.add(socketRing);
+
+    const socketAnchor = new THREE.Object3D();
+    socketAnchor.position.set(1.47, 0, -0.08);
+    headGroup.add(socketAnchor);
+
+    const armGroup = new THREE.Group();
+    scene.add(armGroup);
+
+    const midJointGroup = new THREE.Group();
+    armGroup.add(midJointGroup);
+
+    const hingeDrumGeo = new THREE.CylinderGeometry(0.19, 0.19, 0.22, 24);
+    hingeDrumGeo.rotateX(Math.PI / 2);
+    const hingeDrum = new THREE.Mesh(hingeDrumGeo, darkMetalMat);
+    midJointGroup.add(hingeDrum);
+
+    const hingeRingGeo = new THREE.TorusGeometry(0.192, 0.022, 12, 24);
+    const hingeRing = new THREE.Mesh(hingeRingGeo, orangeMat);
+    hingeRing.position.z = 0.08;
+    midJointGroup.add(hingeRing);
+
+    const hingeKnobGeo = new THREE.CylinderGeometry(0.08, 0.09, 0.08, 16);
+    hingeKnobGeo.rotateX(Math.PI / 2);
+    const hingeKnob = new THREE.Mesh(hingeKnobGeo, orangeMat);
+    hingeKnob.position.z = 0.13;
+    midJointGroup.add(hingeKnob);
+
+    const wristBall = new THREE.Mesh(new THREE.SphereGeometry(0.13, 18, 18), darkMetalMat);
+    armGroup.add(wristBall);
+
+    function createBoomSegment() {
+        const segGroup = new THREE.Group();
+        const rodGeo = new THREE.CylinderGeometry(0.042, 0.042, 1, 14);
+        rodGeo.rotateX(Math.PI / 2);
+
+        const topRod = new THREE.Mesh(rodGeo, bodyMat);
+        topRod.position.y = 0.075;
+        segGroup.add(topRod);
+
+        const botRod = new THREE.Mesh(rodGeo, bodyMat);
+        botRod.position.y = -0.075;
+        segGroup.add(botRod);
+
+        armGroup.add(segGroup);
+
+        const clampGeo = new THREE.BoxGeometry(0.13, 0.24, 0.09);
+        const clamp1 = new THREE.Mesh(clampGeo, orangeMat);
+        const clamp2 = new THREE.Mesh(clampGeo, darkMetalMat);
+        armGroup.add(clamp1);
+        armGroup.add(clamp2);
+
+        return { segGroup, topRod, botRod, clamp1, clamp2 };
     }
-    animate();
 
-    window.addEventListener('resize', () => {
+    const innerBoom = createBoomSegment();
+    const outerBoom = createBoomSegment();
+
+    let headX = 0;
+    let rightEdgeX = 5;
+
+    function resize() {
         if (!container) return;
         const w = container.clientWidth;
         const h = container.clientHeight;
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         renderer.setSize(w, h);
+
+        const rect = container.getBoundingClientRect();
+        const pageCenterX = window.innerWidth / 2;
+        const ndcX = ((pageCenterX - rect.left) / rect.width) * 2 - 1;
+        const halfH = camera.position.z * Math.tan((camera.fov * Math.PI / 180) / 2);
+        const halfW = halfH * camera.aspect;
+
+        headX = ndcX * halfW;
+        rightEdgeX = halfW;
+
+        const scale = window.innerWidth <= 768 ? 0.92 : 1.18;
+        headGroup.scale.set(scale, scale, scale);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let targetRotX = 0;
+    let targetRotY = 0;
+    let isHovered = false;
+
+    container.addEventListener('mouseenter', () => { isHovered = true; });
+    container.addEventListener('mouseleave', () => {
+        isHovered = false;
+        targetRotX = 0;
+        targetRotY = 0;
     });
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const pageCenterX = window.innerWidth / 2;
+        const centerY = rect.top + rect.height / 2;
+        const relX = (e.clientX - pageCenterX) / (rect.width / 2);
+        const relY = (e.clientY - centerY) / (rect.height / 2);
+        targetRotY = Math.max(-0.45, Math.min(0.45, relX * 0.45));
+        targetRotX = Math.max(-0.25, Math.min(0.25, relY * 0.25));
+    });
+
+    const clock = new THREE.Clock();
+    const socketWorldPos = new THREE.Vector3();
+    const midJointPos = new THREE.Vector3();
+    const mountPos = new THREE.Vector3();
+
+    function positionSegment(seg, pA, pB) {
+        const dist = pA.distanceTo(pB);
+        seg.segGroup.position.copy(pA).lerp(pB, 0.5);
+        seg.segGroup.lookAt(pB);
+        seg.topRod.scale.set(1, 1, dist);
+        seg.botRod.scale.set(1, 1, dist);
+
+        seg.clamp1.position.copy(pA).lerp(pB, 0.28);
+        seg.clamp1.lookAt(pB);
+        seg.clamp2.position.copy(pA).lerp(pB, 0.72);
+        seg.clamp2.lookAt(pB);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+
+        const bobY = Math.sin(elapsedTime * 1.8) * 0.045;
+        headGroup.position.set(headX, -0.05 + bobY, 0);
+
+        if (isHovered) {
+            headGroup.rotation.y += (targetRotY - headGroup.rotation.y) * 0.08;
+            headGroup.rotation.x += (targetRotX - headGroup.rotation.x) * 0.08;
+        } else {
+            const idleY = Math.sin(elapsedTime * 0.9) * 0.14;
+            const idleX = Math.cos(elapsedTime * 1.2) * 0.05;
+            headGroup.rotation.y += (idleY - headGroup.rotation.y) * 0.04;
+            headGroup.rotation.x += (idleX - headGroup.rotation.x) * 0.04;
+        }
+
+        headGroup.updateMatrixWorld(true);
+        socketAnchor.getWorldPosition(socketWorldPos);
+
+        wristBall.position.copy(socketWorldPos);
+
+        const midX = Math.max(socketWorldPos.x + 1.0, (socketWorldPos.x + rightEdgeX) * 0.48);
+        const midY = 0.88 + bobY * 0.35;
+        const midZ = -0.22;
+        midJointPos.set(midX, midY, midZ);
+        midJointGroup.position.copy(midJointPos);
+
+        mountPos.set(rightEdgeX + 0.9, -0.35, -0.28);
+
+        positionSegment(innerBoom, midJointPos, socketWorldPos);
+        positionSegment(outerBoom, mountPos, midJointPos);
+
+        renderer.render(scene, camera);
+    }
+    animate();
 }
 
 function initMintSnapLogo() {
