@@ -101,129 +101,36 @@ function initAvatar() {
     headGroup.add(bezelMesh);
 
     const trimShape = createRoundedRectShape(2.14, 1.44, 0.3);
-    const trimPoints = trimShape.getPoints(56).map(p => new THREE.Vector3(p.x, p.y, 0.565));
+    const trimPoints = trimShape.getPoints(56).map(p => new THREE.Vector3(p.x, p.y, 0.581));
     const trimGeo = new THREE.BufferGeometry().setFromPoints(trimPoints);
     const trimLine = new THREE.LineLoop(trimGeo, new THREE.LineBasicMaterial({ color: 0xff5b14 }));
     headGroup.add(trimLine);
 
     const screenShape = createRoundedRectShape(2.08, 1.38, 0.28);
     const screenGeo = new THREE.ShapeGeometry(screenShape, 16);
-    const faceScreenMesh = new THREE.Mesh(screenGeo, screenMat);
-    faceScreenMesh.position.set(0, 0, 0.568);
+    screenGeo.computeBoundingBox();
+    const sMax = screenGeo.boundingBox.max;
+    const sMin = screenGeo.boundingBox.min;
+    const sSize = new THREE.Vector2(sMax.x - sMin.x, sMax.y - sMin.y);
+    const uvAttr = screenGeo.attributes.uv;
+    const posAttr = screenGeo.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) {
+        uvAttr.setXY(
+            i,
+            (posAttr.getX(i) - sMin.x) / sSize.x,
+            (posAttr.getY(i) - sMin.y) / sSize.y
+        );
+    }
+    uvAttr.needsUpdate = true;
+
+    const faceSrc = window.FACE_ORANGE_DATA_URL || 'pics/face-orange.png';
+    const faceTexture = new THREE.TextureLoader().load(faceSrc);
+    const faceScreenMat = new THREE.MeshBasicMaterial({
+        map: faceTexture
+    });
+    const faceScreenMesh = new THREE.Mesh(screenGeo, faceScreenMat);
+    faceScreenMesh.position.set(0, 0, 0.579);
     headGroup.add(faceScreenMesh);
-
-    const faceWireframeGroup = new THREE.Group();
-    faceWireframeGroup.position.set(0, 0.02, 0.576);
-    headGroup.add(faceWireframeGroup);
-
-    const faceBrightMat = new THREE.LineBasicMaterial({ color: 0xff8547, transparent: true, opacity: 0.95 });
-    const faceOrangeMat = new THREE.LineBasicMaterial({ color: 0xff5b14, transparent: true, opacity: 0.9 });
-    const faceMeshMat = new THREE.LineBasicMaterial({ color: 0xff5b14, transparent: true, opacity: 0.32 });
-
-    function addPolyLine(pts, mat, zOffset = 0, closed = false) {
-        const vecs = pts.map(p => new THREE.Vector3(p[0], p[1], zOffset));
-        const geo = new THREE.BufferGeometry().setFromPoints(vecs);
-        const line = closed ? new THREE.LineLoop(geo, mat) : new THREE.Line(geo, mat);
-        faceWireframeGroup.add(line);
-    }
-
-    function addCurveArc(cx, cy, rx, ry, startA, endA, segs, mat, zOffset = 0) {
-        const pts = [];
-        for (let i = 0; i <= segs; i++) {
-            const a = startA + (endA - startA) * (i / segs);
-            pts.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]);
-        }
-        addPolyLine(pts, mat, zOffset, false);
-    }
-
-    addPolyLine([
-        [-0.36, 0.22], [-0.38, 0.04], [-0.35, -0.14], [-0.26, -0.30],
-        [-0.12, -0.40], [0, -0.43], [0.12, -0.40],
-        [0.26, -0.30], [0.35, -0.14], [0.38, 0.04], [0.36, 0.22]
-    ], faceOrangeMat, 0.004);
-
-    addPolyLine([[-0.38, 0.08], [-0.44, 0.06], [-0.43, -0.09], [-0.36, -0.12]], faceOrangeMat, 0.002);
-    addPolyLine([[0.38, 0.08], [0.44, 0.06], [0.43, -0.09], [0.36, -0.12]], faceOrangeMat, 0.002);
-
-    addPolyLine([[-0.18, -0.36], [-0.19, -0.52]], faceOrangeMat, 0.002);
-    addPolyLine([[0.18, -0.36], [0.19, -0.52]], faceOrangeMat, 0.002);
-    addPolyLine([[-0.52, -0.64], [-0.21, -0.51], [-0.10, -0.58], [0, -0.60], [0.10, -0.58], [0.21, -0.51], [0.52, -0.64]], faceOrangeMat, 0.002);
-
-    const curls = [
-        [-0.39, 0.20, 0.075, 0.7, 3.8],
-        [-0.41, 0.30, 0.08, 0.8, 4.1],
-        [-0.36, 0.40, 0.085, 0.4, 3.6],
-        [-0.26, 0.47, 0.09, 0.1, 3.3],
-        [-0.13, 0.51, 0.095, -0.1, 3.1],
-        [0.0, 0.52, 0.095, -0.2, 3.3],
-        [0.14, 0.51, 0.095, -0.1, 3.2],
-        [0.27, 0.46, 0.088, -0.3, 3.0],
-        [0.37, 0.39, 0.085, -0.6, 2.7],
-        [0.41, 0.29, 0.08, -1.0, 2.3],
-        [0.39, 0.19, 0.075, -1.2, 2.1],
-        [-0.29, 0.36, 0.065, 2.8, 6.0],
-        [-0.17, 0.39, 0.07, 2.9, 6.1],
-        [-0.04, 0.40, 0.07, 3.0, 6.2],
-        [0.09, 0.39, 0.07, 3.0, 6.2],
-        [0.22, 0.37, 0.068, 3.1, 6.3],
-        [0.32, 0.32, 0.06, 3.3, 6.4],
-        [-0.21, 0.44, 0.06, 0.3, 3.6],
-        [0.06, 0.46, 0.065, 0.2, 3.5],
-        [0.24, 0.42, 0.06, 0.1, 3.4]
-    ];
-    curls.forEach(c => addCurveArc(c[0], c[1], c[2], c[2] * 0.9, c[3], c[4], 10, faceOrangeMat, 0.005));
-
-    addPolyLine([[-0.30, 0.24], [-0.20, 0.27], [-0.08, 0.24]], faceBrightMat, 0.008);
-    addPolyLine([[0.08, 0.24], [0.20, 0.27], [0.30, 0.24]], faceBrightMat, 0.008);
-
-    function addLensFrame(cx, cy) {
-        addPolyLine([
-            [cx - 0.13, cy + 0.08],
-            [cx, cy + 0.095],
-            [cx + 0.13, cy + 0.08],
-            [cx + 0.145, cy + 0.01],
-            [cx + 0.125, cy - 0.075],
-            [cx + 0.04, cy - 0.11],
-            [cx - 0.05, cy - 0.11],
-            [cx - 0.125, cy - 0.07],
-            [cx - 0.145, cy + 0.01]
-        ], faceBrightMat, 0.012, true);
-    }
-    addLensFrame(-0.185, 0.105);
-    addLensFrame(0.185, 0.105);
-    addPolyLine([[-0.04, 0.145], [0, 0.16], [0.04, 0.145]], faceBrightMat, 0.012);
-    addPolyLine([[-0.33, 0.155], [-0.38, 0.145]], faceBrightMat, 0.010);
-    addPolyLine([[0.33, 0.155], [0.38, 0.145]], faceBrightMat, 0.010);
-
-    addCurveArc(-0.18, 0.10, 0.065, 0.032, 0.2, Math.PI - 0.2, 8, faceBrightMat, 0.007);
-    addCurveArc(-0.18, 0.105, 0.025, 0.025, 0, Math.PI * 2, 10, faceOrangeMat, 0.007);
-    addCurveArc(0.18, 0.10, 0.065, 0.032, 0.2, Math.PI - 0.2, 8, faceBrightMat, 0.007);
-    addCurveArc(0.18, 0.105, 0.025, 0.025, 0, Math.PI * 2, 10, faceOrangeMat, 0.007);
-
-    addPolyLine([[-0.025, 0.10], [-0.035, -0.04]], faceOrangeMat, 0.009);
-    addPolyLine([[-0.08, -0.075], [-0.045, -0.105], [0, -0.095], [0.045, -0.105], [0.08, -0.075]], faceBrightMat, 0.009);
-
-    addPolyLine([[-0.155, -0.215], [-0.07, -0.235], [0, -0.232], [0.07, -0.235], [0.155, -0.215]], faceBrightMat, 0.009);
-    addPolyLine([[-0.13, -0.215], [-0.045, -0.195], [0, -0.205], [0.045, -0.195], [0.13, -0.215]], faceOrangeMat, 0.008);
-    addPolyLine([[-0.07, -0.275], [0, -0.285], [0.07, -0.275]], faceOrangeMat, 0.008);
-
-    const meshLines = [
-        [[-0.36, 0.22], [-0.30, 0.24]],
-        [[0.36, 0.22], [0.30, 0.24]],
-        [[-0.38, 0.04], [-0.33, 0.03]],
-        [[0.38, 0.04], [0.33, 0.03]],
-        [[-0.35, -0.14], [-0.155, -0.215]],
-        [[0.35, -0.14], [0.155, -0.215]],
-        [[-0.26, -0.30], [-0.12, -0.40]],
-        [[-0.26, -0.30], [-0.07, -0.275]],
-        [[0.26, -0.30], [0.07, -0.275]],
-        [[0, -0.285], [0, -0.43]],
-        [[-0.12, -0.40], [0, -0.285]],
-        [[0.12, -0.40], [0, -0.285]],
-        [[-0.08, -0.075], [-0.155, -0.215]],
-        [[0.08, -0.075], [0.155, -0.215]]
-    ];
-    meshLines.forEach(seg => addPolyLine(seg, faceMeshMat, 0.003));
 
     const antBaseGeo = new THREE.CylinderGeometry(0.08, 0.11, 0.08, 16);
     const antBase = new THREE.Mesh(antBaseGeo, darkMetalMat);

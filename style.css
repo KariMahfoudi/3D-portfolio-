@@ -22,6 +22,15 @@
 
 body{
     background-color: var(--bg-main);
+    background-image:
+        radial-gradient(circle at 82% 18%, rgba(255, 91, 20, 0.08) 0%, transparent 42%),
+        radial-gradient(circle at 12% 72%, rgba(255, 91, 20, 0.05) 0%, transparent 45%),
+        linear-gradient(to right, rgba(189, 189, 189, 0.55) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(189, 189, 189, 0.55) 1px, transparent 1px),
+        linear-gradient(to right, rgba(189, 189, 189, 0.25) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(189, 189, 189, 0.25) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 128px 128px, 128px 128px, 32px 32px, 32px 32px;
+    background-attachment: fixed;
     color: var(--text-dark);
     font-family: var(--font-mono);
     overflow-x: hidden;
@@ -133,6 +142,7 @@ body{
     border-left: 1px solid var(--line-color);
     border-right: 1px solid var(--line-color);
     background-image: linear-gradient(to right, var(--line-color) 1px, transparent 1px);
+    background-size: 25% 100%;
 }
 .btn-orange{
     background-color: var(--accent-orange);
@@ -196,6 +206,7 @@ body{
     justify-content: center;
     min-height: 340px;
     border-bottom: 1px solid var(--line-color);
+    background: radial-gradient(circle at 33% 50%, rgba(255, 91, 20, 0.08) 0%, transparent 52%);
     position: relative;
     overflow: hidden;
 }
